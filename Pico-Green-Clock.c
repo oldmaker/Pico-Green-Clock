@@ -4,7 +4,7 @@
    astlouys@gmail.com
    Revision 01-JUN-2023
    Compiler: arm-none-eabi-gcc 7.3.1
-   Version 9.02
+   Version 9.02   ------------------->> Modified by OldMaker (automatic brightness and Italian language)
 
    Raspberry Pi Pico firmware to drive the Waveshare Pico-Green-Clock.
    From an original software version 1.00 by Waveshare
@@ -288,21 +288,25 @@
 #define FIRMWARE_VERSION "9.02"  ///
 
 /* Select the language for data display. */
-#define DEFAULT_LANGUAGE ENGLISH // choices for now are FRENCH, ENGLISH and GERMAN.
+#define DEFAULT_LANGUAGE ENGLISH   // choices for now are FRENCH, ENGLISH, GERMAN, CZECH and ITALIAN.
 
 /* While in development mode, we may want to disable NTP update, for example while testing Summer Time handling algorithm. */
 // #define NTP_ENABLE  /// WARNING: This #define is not supported for now. Use "#define PICO_W" below instead to enable NTP for now.
-#define NETWORK_NAME     "MyNetworkName"  /// for those with a development environment, you can enter your SSID and password below, run the Firmware until the
-#define NETWORK_PASSWORD "MyPassword"     /// first date scrolling (credentials will be saved to flash), then erase the credentials and put comment on both lines.
+
+// For those with a development environment, you can enter your SSID and password below, run the Firmware until the
+// first date scrolling (credentials will be saved to flash), then erase the credentials and put comment on both lines.
+// For next SSID/password change, see at line 2280 (One-time FlashConfig)
+#define NETWORK_NAME     "MyNetworkName"
+#define NETWORK_PASSWORD "MyNetworkPassword"
 
 /* If a Pico W is used, librairies for Wi-Fi and NTP synchronization will be merged in the executable. If PICO_W is not defined, NTP is automatically disabled. */
-#define PICO_W  ///
+#define PICO_W
 
 /* Flag to handle automatically the daylight saving time. List of countries are given in the User Guide. */
-#define DST_COUNTRY DST_NORTH_AMERICA
+#define DST_COUNTRY DST_EUROPE
 
 /* Release or Developer Version: Make selective choices or options. */
-#define RELEASE_VERSION  ///
+#define RELEASE_VERSION
 
 
 
@@ -341,7 +345,7 @@
 #define REMINDER_FILENAME "RemindersAndre.cpp"
 
 /* Conditional compile to allow a quicker power-up sequence by-passing some device tests. */
-#define QUICK_START  ///
+#define QUICK_START
 #ifdef QUICK_START
 #warning Built with QUICK_START
 #endif  // QUICK_START
@@ -421,7 +425,7 @@
 #define SCROLL_DEFAULT FLAG_ON  // choices are FLAG_ON / FLAG_OFF
 
 /* Scroll one dot to the left every such milliseconds (80 is a good start point. lower = faster). */
-#define SCROLL_DOT_TIME 66      // this is a UINT8 (must be between 0 and 255).
+#define SCROLL_DOT_TIME 80      // this is a UINT8 (must be between 0 and 255).
 
 /* Date, temperature and other options will scroll at this frequency
    (in minutes - we must leave enough time for the previous scroll to complete). */
@@ -432,6 +436,10 @@
 
 /* Time will be displayed in 24-hours format by default. */
 #define TIME_DISPLAY_DEFAULT H24     // choices are H12 and H24.
+
+/* Display brightness parameters. */
+#define MIN_LIGHT_LEVEL      10      // the light level at which the display brightness will be set at 10%.
+#define MAX_LIGHT_LEVEL    1000      // the light level at which the display brightness will be set at 100%.
 
 /* Exit setup mode after this period of inactivity (in seconds). (for "clock setup", "alarm setup" or "timer setup"). */
 #define TIME_OUT_PERIOD 20
@@ -446,10 +454,10 @@
 #define NIGHT_LIGHT_TIME_OFF   8                // if "NIGHT_LIGHT_NIGHT", LEDs will turn Off at this time (in the morning).
 
 /* Hourly chime default values. */
-#define CHIME_DEFAULT  CHIME_DAY         // choices are CHIME_OFF / CHIME_ON / CHIME_DAY
+#define CHIME_DEFAULT  CHIME_OFF         // choices are CHIME_OFF / CHIME_ON / CHIME_DAY
 #define CHIME_TIME_ON          9         // if "CHIME_DAY", "hourly chime" and "calendar event" will sound beginning at this time (in the morning).
 #define CHIME_TIME_OFF        21         // if "CHIME_DAY", "hourly chime" and "calendar event" will sound for the last time at this time (in the evening).
-#define CHIME_HALF_HOUR  FLAG_ON         // if "FLAG_ON", will sound a "double-beep" on half-hour (every xxh30), compliant to chime settings above.
+#define CHIME_HALF_HOUR  FLAG_OFF        // if "FLAG_ON", will sound a "double-beep" on half-hour (every xxh30), compliant to chime settings above.
 #define CHIME_HOUR_COUNT FLAG_OFF        // if "FLAG_ON", hourly chime will beep a number of times equivalent to the hour value in 12-hour format.
 #define CHIME_HOUR_COUNT_BEEP_DURATION 300  // duration of "hour count" beeps (in msec) when flag above is On.
 /* NOTE: See also revision history above (or User guide) about "night time workers" support for hourly chime. */
@@ -570,8 +578,9 @@
 #define FRENCH            0x02
 #define GERMAN            0x03
 #define CZECH             0x04
-#define SPANISH           0x05  // just a placeholder for now. Spanish is not implemented yet.
-#define LANGUAGE_HI_LIMIT 0x05
+#define ITALIAN           0x05
+#define SPANISH           0x06  // just a placeholder for now. Spanish is not implemented yet.
+#define LANGUAGE_HI_LIMIT 0x06
 
 
 /* List of commands to be processed by command queue handler (while in the "main()" thread context). */
@@ -1033,7 +1042,7 @@ struct flash_config
   UCHAR  Version[6];          // firmware version number (format: "06.00" - including end-of-string).
   UINT8  CurrentYearCentile;  // assume we are in years 20xx on power-up but is adjusted when configuration is read (will your clock live long enough for a "21" ?!).
   UINT8  Language;            // language used for data display (including date scrolling).
-  UCHAR  DSTCountry;  // specifies how to handle the daylight saving time (see User Guide and / or clock options above).
+  UCHAR  DSTCountry;          // specifies how to handle the daylight saving time (see User Guide and / or clock options above).
   UINT8  TemperatureUnit;     // CELSIUS or FAHRENHEIT default value (see clock options above).
   UINT8  TimeDisplayMode;     // H24 or H12 default value (see clock options above).
   UINT8  ChimeMode;           // chime mode (Off / On / Day).
@@ -1253,7 +1262,8 @@ UCHAR MonthName[LANGUAGE_HI_LIMIT][13][13] =
   {{}, {"January"},   {"February"},  {"March"},     {"April"},     {"May"},       {"June"},      {"July"},      {"August"},    {"September"}, {"October"},   {"November"},  {"December"}},
   {{}, {"Janvier"},   {"Fevrier"},   {"Mars"},      {"Avril"},     {"Mai"},       {"Juin"},      {"Juillet"},   {"Aout"},      {"Septembre"}, {"Octobre"},   {"Novembre"},  {"Decembre"}},
   {{}, {"Januar"},    {"Februar"},   {"Maerz"},     {"April"},     {"Mai"},       {"Juni"},      {"Juli"},      {"August"},    {"September"}, {"Oktober"},   {"November"},  {"Dezember"}},
-  {{}, {"leden"},     {"unor"},      {"brezen"},    {"duben"},     {"kveten"},    {"cerven"},    {"cervenec"},  {"srpen"},     {"zari"},      {"rijen"},     {"listopad"},  {"prosinec"}}
+  {{}, {"leden"},     {"unor"},      {"brezen"},    {"duben"},     {"kveten"},    {"cerven"},    {"cervenec"},  {"srpen"},     {"zari"},      {"rijen"},     {"listopad"},  {"prosinec"}},
+  {{}, {"Gennaio"},   {"Febbraio"},  {"Marzo"},     {"Aprile"},    {"Maggio"},    {"Giugno"},    {"Luglio"},    {"Agosto"},    {"Settembre"}, {"Ottobre"},   {"Novembre"},  {"Dicembre"}}
 };
 
 
@@ -1263,7 +1273,8 @@ UCHAR ShortMonth[LANGUAGE_HI_LIMIT][13][4] =
   {{}, {"JAN"},  {"FEB"},  {"MAR"},  {"APR"},  {"MAY"},  {"JUN"},  {"JUL"},  {"AUG"},  {"SEP"},  {"OCT"},  {"NOV"},  {"DEC"}},
   {{}, {"JAN"},  {"FEV"},  {"MAR"},  {"AVR"},  {"MAI"},  {"JUN"},  {"JUL"},  {"AOU"},  {"SEP"},  {"OCT"},  {"NOV"},  {"DEC"}},
   {{}, {"JAN"},  {"FEB"},  {"MAR"},  {"APR"},  {"MAI"},  {"JUN"},  {"JUL"},  {"AUG"},  {"SEP"},  {"OKT"},  {"NOV"},  {"DEZ"}},
-  {{}, {"led."}, {"uno."}, {"bre."}, {"dub."}, {"kve."}, {"cvn."}, {"cvc."}, {"srp."}, {"zar."}, {"rij."}, {"lis."}, {"pro."}}
+  {{}, {"led."}, {"uno."}, {"bre."}, {"dub."}, {"kve."}, {"cvn."}, {"cvc."}, {"srp."}, {"zar."}, {"rij."}, {"lis."}, {"pro."}},
+  {{}, {"GEN"},  {"FEB"},  {"MAR"},  {"APR"},  {"MAG"},  {"GIU"},  {"LUG"},  {"AGO"},  {"SET"},  {"OTT"},  {"NOV"},  {"DIC"}}
 };
 
 UCHAR DayName[LANGUAGE_HI_LIMIT][8][13] =
@@ -1272,7 +1283,8 @@ UCHAR DayName[LANGUAGE_HI_LIMIT][8][13] =
   {{}, {"Sunday"},     {"Monday"},     {"Tuesday"},    {"Wednesday"}, {"Thursday"},   {"Friday"},     {"Saturday"}},
   {{}, {"Dimanche"},   {"Lundi"},      {"Mardi"},      {"Mercredi"},  {"Jeudi"},      {"Vendredi"},   {"Samedi"}},
   {{}, {"Sonntag"},    {"Montag"},     {"Dienstag"},   {"Mittwoch"},  {"Donnerstag"}, {"Freitag"},    {"Samstag"}},
-  {{}, {"nedele"},     {"pondeli"},    {"utery"},      {"streda"},    {"ctvrtek"},    {"patek"},      {"sobota"}}  
+  {{}, {"nedele"},     {"pondeli"},    {"utery"},      {"streda"},    {"ctvrtek"},    {"patek"},      {"sobota"}},
+  {{}, {"Domenica"},   {"Lunedi"},     {"Martedi"},    {"Mercoledi"}, {"Giovedi"},    {"Venerdi"},    {"Sabato"}}
 };
 
 UCHAR ShortDay[LANGUAGE_HI_LIMIT][8][10] =
@@ -1281,7 +1293,8 @@ UCHAR ShortDay[LANGUAGE_HI_LIMIT][8][10] =
   {{}, {"SUN"}, {"MON"}, {"TUE"}, {"WED"}, {"THU"}, {"FRI"}, {"SAT"}},
   {{}, {"DIM"}, {"LUN"}, {"MAR"}, {"MER"}, {"JEU"}, {"VEN"}, {"SAM"}},
   {{}, {"SON"}, {"MON"}, {"DIE"}, {"MIT"}, {"DON"}, {"FRE"}, {"SAM"}},
-  {{}, {"ne"},  {"po"},  {"ut"},  {"st"},  {"ct"},  {"pa"},  {"so"}}
+  {{}, {"ne"},  {"po"},  {"ut"},  {"st"},  {"ct"},  {"pa"},  {"so"}},
+  {{}, {"DOM"}, {"LUN"}, {"MAR"}, {"MER"}, {"GIO"}, {"VEN"}, {"SAB"}}
 };
 
 
@@ -1728,7 +1741,7 @@ int main(void)
   UINT32 Bme280UniqueId;
   UINT32 CounterHiLimit;
 
-  UINT64 ArchiveIdleMonitor[14][120];  // keep an history of idle monitorfor reference purposes (outside monitor is required).
+  UINT64 ArchiveIdleMonitor[14][120];  // keep an history of idle monitor for reference purposes (outside monitor is required).
   UINT64 CurrentTimerValue;
   UINT64 CurrentWatchDogReset;
   UINT64 DataBuffer;
@@ -1797,6 +1810,14 @@ int main(void)
   ShortMonth[CZECH][OCT][1] = (UCHAR)131; // i-acute
 
 
+  /* Add accents to some Italian weekdays. */
+  DayName[ITALIAN][MON][5] = (UCHAR)141; // i-grave
+  DayName[ITALIAN][TUE][6] = (UCHAR)141; // i-grave
+  DayName[ITALIAN][WED][8] = (UCHAR)141; // i-grave
+  DayName[ITALIAN][THU][6] = (UCHAR)141; // i-grave
+  DayName[ITALIAN][FRI][6] = (UCHAR)141; // i-grave
+
+
 
   /* ---------------------------------------------------------------- *\
             Seed random number generator (for dice rolling).
@@ -1861,7 +1882,7 @@ int main(void)
   #ifdef PICO_W
   /* ---------------------------------------------------------------- *\
       If microcontroller is a Pico W, Green Clock real-time clock IC
-     will be synchronized periodically through network time protocol.
+      will be synchronized periodically through network time protocol.
         User must have encoded credentials to Pico's flash before.
                    (Refer to User Guide for details).
   \* ---------------------------------------------------------------- */
@@ -1965,17 +1986,17 @@ int main(void)
   // DebugBitMask += DEBUG_CORE;
   // DebugBitMask += DEBUG_CRC16;
   // DebugBitMask += DEBUG_DHT;
-  DebugBitMask += DEBUG_DST;
+  // DebugBitMask += DEBUG_DST;
   // DebugBitMask += DEBUG_EVENT;
   // DebugBitMask += DEBUG_FLASH;
   // DebugBitMask += DEBUG_IDLE_MONITOR;
   // DebugBitMask += DEBUG_INDICATORS;
   // DebugBitMask += DEBUG_IR_COMMAND;
-  DebugBitMask += DEBUG_NTP;
+  // DebugBitMask += DEBUG_NTP;
   // DebugBitMask += DEBUG_PICO_W;
   // DebugBitMask += DEBUG_PWM;
-  DebugBitMask += DEBUG_REMINDER;
-  DebugBitMask += DEBUG_RTC;
+  // DebugBitMask += DEBUG_REMINDER;
+  // DebugBitMask += DEBUG_RTC;
   // DebugBitMask += DEBUG_SOUND_QUEUE;
   // DebugBitMask += DEBUG_SCROLL;
   // DebugBitMask += DEBUG_TEMP;
@@ -2121,7 +2142,7 @@ int main(void)
       }
     }
     uart_send(__LINE__, "------------------------------------------\r\r\r");
-  }
+  }               // End DebugBitMask
 
 
 
@@ -2387,7 +2408,7 @@ int main(void)
         Clock "Setup order" in most languages is Day-Month(-Year),
                   as opposed to English Month-Day(-Year).
   \* ---------------------------------------------------------------- */
-  if ((FlashConfig.Language == FRENCH) || (FlashConfig.Language == CZECH))
+  if ((FlashConfig.Language == FRENCH) || (FlashConfig.Language == CZECH) || (FlashConfig.Language == ITALIAN))
   {
     SETUP_DAY_OF_MONTH = 0x03;
     SETUP_MONTH        = 0x04;
@@ -2443,8 +2464,7 @@ int main(void)
 
   convert_human_to_tm(&HumanTime, &TmTime);
   Dum1UInt64 = convert_tm_to_unix(&TmTime);
-  if (DebugBitMask & DEBUG_REMINDER)
-    uart_send(__LINE__, "Current Unix time: %llu\r", Dum1UInt64);
+  if (DebugBitMask & DEBUG_REMINDER)    uart_send(__LINE__, "Current Unix time: %llu\r", Dum1UInt64);
 
 
 
@@ -2749,7 +2769,7 @@ int main(void)
     uart_send(__LINE__, "              - StartHour: %2u                EndHour: %2u\r\r", DstParameters[FlashConfig.DSTCountry].StartHour, DstParameters[FlashConfig.DSTCountry].EndHour);
 
     uart_send(__LINE__, "          - Shift minutes: %2u\r\r\r", DstParameters[FlashConfig.DSTCountry].ShiftMinutes);
-  }
+  }               // End DebugBitMask & DEBUG_DST
 
 
 
@@ -2855,14 +2875,18 @@ int main(void)
     case (CZECH):
       sprintf(String, "Pico Green Clock - verze firmwaru %s    ", FIRMWARE_VERSION);
     break;
-  
-    case (ENGLISH):
-    default:
-      sprintf(String, "Pico Green Clock - Firmware Version %s    ", FIRMWARE_VERSION);
-    break;
 
     case (FRENCH):
       sprintf(String, "Pico Green Clock - Microcode Version %s    ", FIRMWARE_VERSION);
+    break;
+  
+    case (ITALIAN):
+      sprintf(String, "Pico Green Clock - Versione Firmware %s    ", FIRMWARE_VERSION);
+    break;
+  
+    default:
+    case (ENGLISH):
+      sprintf(String, "Pico Green Clock - Firmware Version %s    ", FIRMWARE_VERSION);
     break;
   }
   scroll_string(24, String);
@@ -2883,12 +2907,16 @@ int main(void)
     case (FRENCH):
       scroll_string(24, "ATTENTION - PAS DE SON    ");
     break;
+ 
+    case (ITALIAN):
+      scroll_string(24, "ATTENZIONE - SUONO DISATTIVATO    ");
+    break;
 
     default:
     case (ENGLISH):
       scroll_string(24, "WARNING - SOUND CUT-OFF    ");
     break;
-  }
+ }
   #endif  // SOUND_DISABLED
 
 
@@ -2905,6 +2933,10 @@ int main(void)
 
       case (FRENCH):
         scroll_string(24, "DES DEBUG SONT ACTIFS    ");
+      break;
+
+      case (ITALIAN):
+        scroll_string(24, "DEBUG ATTIVO    ");
       break;
 
       default:
@@ -2935,6 +2967,10 @@ int main(void)
 
       case (FRENCH):
         scroll_string(24, "BME280 erreur d'initialisation    ");
+      break;
+
+      case (ITALIAN):
+        scroll_string(24, "BME280 errore d'initializzazione    ");
       break;
 
       default:
@@ -3061,6 +3097,10 @@ int main(void)
 
       case (FRENCH):
         scroll_string(24, "DHT22 erreur de communication    ");
+      break;
+
+      case (ITALIAN):
+        scroll_string(24, "DHT22 errore di comunicazione    ");
       break;
 
       default:
@@ -3475,8 +3515,8 @@ int main(void)
         IdleArchivePacket = 0;
       }
     }
-  }
-}
+  }          // End of main program loop
+}            // End of Main program
 
 
 
@@ -3659,7 +3699,7 @@ void adjust_clock_brightness(void)
   UINT16 DutyCycle;
 
   static UINT16 AmbientLightMSecCounter;
-  static UINT16 LightLevel[MAX_LIGHT_SLOTS] = {550, 550, 550, 550, 550, 550, 550, 550, 550, 550, 550, 550, 550, 550, 550, 550, 550, 550, 550, 550, 550, 550, 550, 550};  // assume average ambient light level on entry.
+  static UINT16 LightLevel[MAX_LIGHT_SLOTS] = {1050, 1050, 1050, 1050, 1050, 1050, 1050, 1050, 1050, 1050, 1050, 1050, 1050, 1050, 1050, 1050, 1050, 1050, 1050, 1050, 1050, 1050, 1050, 1050};  // assume average ambient light level on entry.
 
   int32_t TempLevel;
 
@@ -3667,41 +3707,41 @@ void adjust_clock_brightness(void)
 
 
   /* If the clock has been setup for auto-brightness, get ambient light level from Pico's analog-to-digital converter.
-     (if clock is not in auto-brightness mode, an "average light level value" of 550 will be kept as default until auto-brightness is selected). */
+     (if clock is not in auto-brightness mode, an "average light level value" of 1050 will be kept as default until auto-brightness is selected). */
   if (FlashConfig.FlagAutoBrightness == FLAG_ON)
   {
-    /* Cumulate 5000 readings of the ambient light value (5 seconds of readings every msec.). */
+    /* Cumulate 5 readings of the ambient light value (5 seconds of readings every sec.). */
     ++AmbientLightMSecCounter;
     CumulativeLightLevel += adc_read_light();
 
     
-    /* Check if 5000 milliseconds (5 seconds) have elapsed. */
-    if (AmbientLightMSecCounter >= 5000)
+    /* Check if 5 seconds have elapsed. */
+    if (AmbientLightMSecCounter >= 5)
     {
-      /* Reset the 5000 milliseconds counter. */
+      /* Reset the 5 seconds counter. */
       AmbientLightMSecCounter = 0;
 
-      /* Calculate the average ambient light level for the last five seconds (5000 milliseconds). */
-      LightLevel[NextCell++] = CumulativeLightLevel / 5000;  // average light level for the last 5 seconds.
+      /* Calculate the average ambient light level for the last five seconds. */
+      LightLevel[NextCell++] = CumulativeLightLevel / 5;     // average light level for the last 5 seconds.
       if (NextCell >= MAX_LIGHT_SLOTS) NextCell = 0;         // replace the slot for the last 5-seconds period and when out-of-bound, revert to zero.
       CumulativeLightLevel   = 0;
 
 
-      /* Calculate average ambient light level for the last minute, based on the "MAX_LIGHT_SLOTS" number of "5-seconds" light level slots. */
+      /* Calculate average ambient light level for the last 2 minutes, based on the "MAX_LIGHT_SLOTS" number of "5-seconds" light level slots. */
       for (Loop1UInt = 0; Loop1UInt < MAX_LIGHT_SLOTS; ++Loop1UInt)
         CumulativeLightLevel += LightLevel[Loop1UInt];
 
 
       AverageLightLevel    = (CumulativeLightLevel / MAX_LIGHT_SLOTS);  // average light level for the last "MAX_LIGHT_SLOTS" number of "5-seconds" light level slots.
-      CumulativeLightLevel = 0;  // get ready to cumulate the next 5000 milliseconds.
+      CumulativeLightLevel = 0;                                         // get ready to cumulate the next 5 seconds.
 
     
       /* Update current clock display brightness, based on average ambient light level for the last 2 minutes (hysteresis).
-         Ambient light level goes from around 200 (very dark) to 1500 (very bright). */
+         Ambient light level goes from around 10 (very dark) to 4000 (very bright). */
       AverageLevel = AverageLightLevel;
-      if (AverageLightLevel < 225) AverageLevel = 225;
-      if (AverageLightLevel > 525) AverageLevel = 525;
-      DutyCycle = (UINT16)((AverageLevel - 225) / 3.0);
+      if (AverageLightLevel < MIN_LIGHT_LEVEL) AverageLevel = MIN_LIGHT_LEVEL;
+      if (AverageLightLevel > MAX_LIGHT_LEVEL) AverageLevel = MAX_LIGHT_LEVEL;
+      DutyCycle = (UINT16)(90 * (AverageLevel - MIN_LIGHT_LEVEL) / (MAX_LIGHT_LEVEL - MIN_LIGHT_LEVEL) + 10);
       pwm_set_duty_cycle(DutyCycle);
 
 
@@ -6151,6 +6191,10 @@ void format_temp(UCHAR *TempString, UCHAR *PreString, float Temperature, float H
         sprintf(&TempString[strlen(TempString)], "  vlh: %2.2f%%", Humidity);
       break;
 
+      case (ITALIAN):
+        sprintf(&TempString[strlen(TempString)], "  Umidita: %2.2f%%", Humidity);
+      break;
+
       case (ENGLISH):
       case (FRENCH):
       default:
@@ -6169,6 +6213,10 @@ void format_temp(UCHAR *TempString, UCHAR *PreString, float Temperature, float H
 
       case (FRENCH):
         sprintf(&TempString[strlen(TempString)], "  Pression: %2.2f%% hPa", Pressure);
+      break;
+
+      case (ITALIAN):
+        sprintf(&TempString[strlen(TempString)], "  Pressione: %2.2f%% hPa", Pressure);
       break;
 
       default:
@@ -6382,6 +6430,25 @@ void get_date_string(UCHAR *String)
   {
     /* DayOfWeek and month name. */
     sprintf(String, "%s %X. %s", DayName[FlashConfig.Language][CurrentDayOfWeek], Time_RTC.dayofmonth, MonthName[FlashConfig.Language][DumMonth]);
+
+    /* Add 4-digits year. */
+    sprintf(&String[strlen(String)], " %2.2u%2.2u  ", FlashConfig.CurrentYearCentile, CurrentYearLowPart);
+  }
+
+
+  if (FlashConfig.Language == ITALIAN)
+  {
+    /* Day-of-week name. */
+    sprintf(String, "%s ", DayName[FlashConfig.Language][CurrentDayOfWeek]);
+
+    /* Add Day-of-month. */
+    if (Time_RTC.dayofmonth == 1)
+      sprintf(&String[strlen(String)], "%X° ", Time_RTC.dayofmonth);  // first of month.
+    else
+      sprintf(&String[strlen(String)], "%X ", Time_RTC.dayofmonth);    // other dates.
+
+    /* Add month name. */
+    sprintf(&String[strlen(String)], "%s ", MonthName[FlashConfig.Language][DumMonth]);
 
     /* Add 4-digits year. */
     sprintf(&String[strlen(String)], " %2.2u%2.2u  ", FlashConfig.CurrentYearCentile, CurrentYearLowPart);
@@ -8376,6 +8443,10 @@ void process_ir_command(UINT8 IrCommand)
         String[1] = (UINT8)31; // e - acute.
       break;
  
+      case (ITALIAN):
+        sprintf(String, "Periodo di silenzio: %u minuti", (int)(SilencePeriod / 60));
+      break;
+ 
       case (ENGLISH):
       case (GERMAN):
       default:
@@ -8488,6 +8559,17 @@ void process_ir_command(UINT8 IrCommand)
               }
             break;
 
+            case (ITALIAN):
+              if (FlashConfig.FlagKeyclick == FLAG_ON)
+              {
+                sprintf(String, "Keyclick On - Durata %u ms Repeat1: %u Repeat2: %u", TONE_KEYCLICK_DURATION, TONE_KEYCLICK_REPEAT1, TONE_KEYCLICK_REPEAT2);
+              }
+              else
+              {
+                sprintf(String, "Keyclick Off");
+              }
+            break;
+
             case (ENGLISH):
             case (GERMAN):
             default:
@@ -8536,6 +8618,17 @@ void process_ir_command(UINT8 IrCommand)
               }
             break;
           
+            case (ITALIAN):
+              if (FlashConfig.FlagScrollEnable == FLAG_ON)
+              {
+                sprintf(String, "Scrolling On - Frequenza: %u minuti   Velocita dots: %u msec.", SCROLL_PERIOD_MINUTE, SCROLL_DOT_TIME);
+              }
+              else
+              {
+                sprintf(String, "Scrolling OFF.");
+              }
+            break;
+
             case (ENGLISH):
             case (GERMAN):
             default:
@@ -8586,6 +8679,19 @@ void process_ir_command(UINT8 IrCommand)
               }
             break;
 
+            case (ITALIAN):
+              if (FlashConfig.TemperatureUnit == CELSIUS)
+              {
+                sprintf(String, "Unita di temperatura: Celsius   ");
+                String[4] = (UINT8)140;  // a-grave
+              }
+              else
+              {
+                sprintf(String, "Unita di temperatura: Fahrenheit   ");
+                String[4] = (UINT8)140;  // a-grave
+              }
+            break;
+
             case (ENGLISH):
             case (GERMAN):
             default:
@@ -8627,6 +8733,11 @@ void process_ir_command(UINT8 IrCommand)
               sprintf(String, "Language is German   ");
             break;
 
+            case (ITALIAN):
+              sprintf(String, "La lingua e l'Italiano'   ");
+              String[10]  = (UINT8)31;     // e con accento acuto.
+            break;
+
             default:
               sprintf(String, "Undefined language   ");
             break;
@@ -8664,6 +8775,17 @@ void process_ir_command(UINT8 IrCommand)
               else
               {
                 sprintf(String, "Format d'affichage de l'heure: 24 heures");
+              }
+            break;
+
+            case (ITALIAN):
+              if (FlashConfig.TimeDisplayMode == H12)
+              {
+                sprintf(String, "Formato di visualizzazione dell'orario: 12 ore");
+              }
+              else
+              {
+                sprintf(String, "Formato di visualizzazione dell'orario: 24 ore");
               }
             break;
 
@@ -8720,6 +8842,24 @@ void process_ir_command(UINT8 IrCommand)
               }
             break;
 
+            case (ITALIAN):
+              if (FlashConfig.ChimeMode == CHIME_OFF)
+              {
+                sprintf(String, "Il segnale orario e Off");
+                String[18]  = (UINT8)31;     // e con accento acuto.
+              }
+              else if (FlashConfig.ChimeMode == CHIME_ON)
+              {
+                sprintf(String, "Il segnale orario e On");
+                String[18]  = (UINT8)31;     // e con accento acuto.
+              }
+              else if (FlashConfig.ChimeMode == CHIME_DAY)
+              {
+                sprintf(String, "Il segnale orario e intermittente, dalle %u:00 alle %u:00", FlashConfig.ChimeTimeOn, FlashConfig.ChimeTimeOff);
+                String[18]  = (UINT8)31;     // e con accento acuto.
+              }
+            break;
+
             case (ENGLISH):
             case (GERMAN):
             default:
@@ -8744,7 +8884,7 @@ void process_ir_command(UINT8 IrCommand)
           /* Night light. */
           switch (FlashConfig.Language)
           {
-           case (CZECH):
+            case (CZECH):
               if (FlashConfig.NightLightMode == NIGHT_LIGHT_OFF)
               {
                 sprintf(String, "Nocni svetlo je vypnuto.");
@@ -8769,7 +8909,7 @@ void process_ir_command(UINT8 IrCommand)
               }
             break;
  
-           case (FRENCH):
+            case (FRENCH):
               if (FlashConfig.NightLightMode == NIGHT_LIGHT_OFF)
               {
                 sprintf(String, "La veilleuse de nuit est a Off");
@@ -8785,6 +8925,29 @@ void process_ir_command(UINT8 IrCommand)
               else if (FlashConfig.NightLightMode == NIGHT_LIGHT_AUTO)
               {
                 sprintf(String, "La veilleuse de nuit est automatique");
+              }
+            break;
+ 
+            case (ITALIAN):
+              if (FlashConfig.NightLightMode == NIGHT_LIGHT_OFF)
+              {
+                sprintf(String, "La luce notturna e Off");
+                String[17]  = (UINT8)31;     // e con accento acuto.
+              }
+              else if (FlashConfig.NightLightMode == NIGHT_LIGHT_ON)
+              {
+                sprintf(String, "La luce notturna e On");
+                String[17]  = (UINT8)31;     // e con accento acuto.
+              }
+              else if (FlashConfig.NightLightMode == NIGHT_LIGHT_NIGHT)
+              {
+                sprintf(String, "La luce notturna e intermittente, dalle %u:00 alle %u:00", FlashConfig.NightLightTimeOn, FlashConfig.NightLightTimeOff);
+                String[17]  = (UINT8)31;     // e con accento acuto.
+              }
+              else if (FlashConfig.NightLightMode == NIGHT_LIGHT_AUTO)
+              {
+                sprintf(String, "La luce notturna e automatica");
+                String[17]  = (UINT8)31;     // e con accento acuto.
               }
             break;
  
@@ -8847,6 +9010,21 @@ void process_ir_command(UINT8 IrCommand)
               }
             break;
  
+            case (ITALIAN):
+              if (FlashConfig.FlagAutoBrightness == FLAG_ON)
+              {
+                sprintf(String, "La luminosita automatica e On   Luce ambiente: %u   Isteresi: %u   Display: %u%c", adc_read_light(), AverageLightLevel, Pwm[PWM_BRIGHTNESS].DutyCycle, '%');
+                String[12] = (UINT8)140;  // a-grave
+                String[25] = (UINT8)31;   // e-acute
+              }
+              else
+              {
+                sprintf(String, "La luminosita automatica e Off");
+                String[12] = (UINT8)140;  // a-grave
+                String[25] = (UINT8)31;   // e-acute
+              }
+            break;
+ 
             case (ENGLISH):
             case (GERMAN):
             default:
@@ -8888,6 +9066,7 @@ void process_ir_command(UINT8 IrCommand)
 
           case (CZECH):
           case (FRENCH):
+          case (ITALIAN):
             sprintf(String, "%u %s: %s   /   ", CurrentDayOfMonth, MonthName[FlashConfig.Language][CurrentMonth], CalendarEvent[Loop1UInt8].Description);
           break;
         }
@@ -8943,6 +9122,17 @@ void process_ir_command(UINT8 IrCommand)
             String[strlen(String) - 20] = (UCHAR)31; // e accent aigu.
             String[strlen(String) - 22] = (UCHAR)31; // e accent aigu
           }
+        }
+      break;
+
+      case (ITALIAN):
+        if (Dum1UInt8 == 0)
+          sprintf(String, "Nessun evento oggi");
+        else if (Dum1UInt8 == 1)
+          sprintf(String, "1 evento oggi");
+        else
+        {
+          sprintf(String, "%u eventi oggi", Dum1UInt8);
         }
       break;
 
@@ -9028,6 +9218,7 @@ void process_ir_command(UINT8 IrCommand)
           {
             case (CZECH):
             case (FRENCH):
+            case (ITALIAN):
               sprintf(String, "%u %s: %s   /   ", DumDayOfMonth, MonthName[FlashConfig.Language][DumMonth], CalendarEvent[Loop2UInt8].Description);
             break;
  
@@ -9109,6 +9300,22 @@ void process_ir_command(UINT8 IrCommand)
             sprintf(String, "   %u evenements cette semaine", Dum1UInt8);
             String[strlen(String) - 22] = (UCHAR)31; // e accent aigu.
             String[strlen(String) - 24] = (UCHAR)31; // e accent aigu
+          }
+        }
+      break;
+
+      case (ITALIAN):
+        if (Dum1UInt8 == 0)
+          sprintf(String, "   Nessun evento questa settimana");
+        else
+        {
+          if (Dum1UInt8 == 1)
+          {
+            sprintf(String, "   1 evento questa settimana");
+          }
+          else
+          {
+            sprintf(String, "   %u eventi questa settimana", Dum1UInt8);
           }
         }
       break;
@@ -9258,6 +9465,10 @@ void process_scroll_queue(void)
               String[9] = (UINT8)31; // e accent aigu.
             break;
 
+            case (ITALIAN):
+              sprintf(String, "Luce ambiente: %u   Isteresi: %u   Display: %u%c    ", adc_read_light(), AverageLightLevel, Pwm[PWM_BRIGHTNESS].DutyCycle, '%');
+            break;
+
             case (ENGLISH):
             case (GERMAN):
             default:
@@ -9307,6 +9518,10 @@ void process_scroll_queue(void)
                   sprintf(String, "Ext: %2.2f%cC  Hum: %2.2f%%  Pression: %4.2f hPa ", Bme280Data.TemperatureC, 0x80, Bme280Data.Humidity, Bme280Data.Pressure);
                 break;
 
+                case (ITALIAN):
+                  sprintf(String, "Temp.est.: %2.2f%cC  Umidita: %2.2f%%  Pressione: %4.2f hPa ", Bme280Data.TemperatureC, 0x80, Bme280Data.Humidity, Bme280Data.Pressure);
+                break;
+
                 case (ENGLISH):
                 default:
                   sprintf(String, "Out: %2.2f%cC  Hum: %2.2f%%  Pressure: %4.2f hPa ", Bme280Data.TemperatureC, 0x80, Bme280Data.Humidity, Bme280Data.Pressure);
@@ -9325,6 +9540,10 @@ void process_scroll_queue(void)
 
                 case (FRENCH):
                   sprintf(String, "Ext: %2.2f%cF  Hum: %2.2f%%  Pression: %4.2f hPa ", Bme280Data.TemperatureF, 0x80, Bme280Data.Humidity, Bme280Data.Pressure);
+                break;
+
+                case (ITALIAN):
+                  sprintf(String, "Temp.est.: %2.2f%cF  Umidita: %2.2f%%  Pressione: %4.2f hPa ", Bme280Data.TemperatureF, 0x80, Bme280Data.Humidity, Bme280Data.Pressure);
                 break;
 
                 case (ENGLISH):
@@ -9689,6 +9908,72 @@ void process_scroll_queue(void)
               }
             break;
  
+            case (ITALIAN):
+              if (FlashConfig.DSTCountry == DST_NONE)
+              {
+                sprintf(String, "Ora legale (DST) non supportata    ");
+              }
+              else
+              {
+                switch(FlashConfig.DSTCountry)
+                {
+                  case (DST_AUSTRALIA):
+                    sprintf(String, "Ora legale (DST) impostata per: Australia");
+                  break;
+
+                  case (DST_AUSTRALIA_HOWE):
+                    sprintf(String, "Ora legale (DST) impostata per: Australia Howe");
+                  break;
+
+                  case (DST_CHILE):
+                    sprintf(String, "Ora legale (DST) impostata per: Chile");
+                  break;
+
+                  case (DST_CUBA):
+                    sprintf(String, "Ora legale (DST) impostata per: Cuba");
+                  break;
+
+                  case (DST_EUROPE):
+                    sprintf(String, "Ora legale (DST) impostata per: Europe");
+                  break;
+
+                  case (DST_ISRAEL):
+                    sprintf(String, "Ora legale (DST) impostata per: Israel");
+                  break;
+
+                  case (DST_LEBANON):
+                    sprintf(String, "Ora legale (DST) impostata per: Lebanon");
+                  break;
+
+                  case (DST_MOLDOVA):
+                    sprintf(String, "Ora legale (DST) impostata per: Moldova");
+                  break;
+
+                  case (DST_NEW_ZEALAND):
+                    sprintf(String, "Ora legale (DST) impostata per: New Zealand");
+                  break;
+
+                  case (DST_NORTH_AMERICA):
+                    sprintf(String, "Ora legale (DST) impostata per: North America");
+                  break;
+
+                  case (DST_PALESTINE):
+                    sprintf(String, "Ora legale (DST) impostata per: Palestine");
+                  break;
+
+                  case (DST_PARAGUAY):
+                    sprintf(String, "Ora legale (DST) impostata per: Paraguay");
+                  break;
+                }
+
+                /* Announce if Daily Saving Time ("DST") is currently active or inactive, depending of current date. */
+                if (FlashConfig.FlagSummerTime == FLAG_ON)
+                  strcat(String, " - Ora legale (DST) attiva    ");
+                else
+                  strcat(String, " - Ora legale (DST) non attiva    ");
+              }
+            break;
+ 
             case (ENGLISH):
             default:
               if (FlashConfig.DSTCountry == DST_NONE)
@@ -9768,14 +10053,18 @@ void process_scroll_queue(void)
               sprintf(String, "UPico Green Clock - verze firmwaru %s    ", FIRMWARE_VERSION);
             break;
 
+            case (FRENCH):
+              sprintf(String, "Pico Green Clock - Microcode Version %s    ", FIRMWARE_VERSION);
+            break;
+  
+            case (ITALIAN):
+              sprintf(String, "Pico Green Clock - Versione Firmware %s    ", FIRMWARE_VERSION);
+            break;
+
             case (ENGLISH):
             case (GERMAN):
             default:
               sprintf(String, "Pico Green Clock - Firmware Version %s    ", FIRMWARE_VERSION);
-            break;
-
-            case (FRENCH):
-              sprintf(String, "Pico Green Clock - Microcode Version %s    ", FIRMWARE_VERSION);
             break;
           }
           scroll_string(24, String);
@@ -9796,6 +10085,7 @@ void process_scroll_queue(void)
             case (ENGLISH):
             case (FRENCH):
             case (GERMAN):
+            case (ITALIAN):
             default:
               sprintf(String, "System idle monitor: %llu    ", IdleMonitor[13]);
             break;
@@ -9875,11 +10165,15 @@ void process_scroll_queue(void)
             switch (FlashConfig.Language)
             {
               case (CZECH):
-                sprintf(String, "Chyba NTP: %lu/%lu.   ", NTPData.NTPErrors);
+                sprintf(String, "Chyba NTP: %lu.   ", NTPData.NTPErrors);
               break;
 
               case (FRENCH):
-                sprintf(String, "Erreurs NTP: %lu/%lu   ", NTPData.NTPErrors);
+                sprintf(String, "Erreurs NTP: %lu   ", NTPData.NTPErrors);
+              break;
+
+              case (ITALIAN):
+                sprintf(String, "Errori NTP: %lu   ", NTPData.NTPErrors);
               break;
 
               case (ENGLISH):
@@ -9906,6 +10200,10 @@ void process_scroll_queue(void)
 
             case (FRENCH):
               sprintf(String, "Statut NTP: %lu/%lu   ", NTPData.NTPErrors, NTPData.NTPReadCycles);
+            break;
+
+            case (ITALIAN):
+              sprintf(String, "Stato NTP: %lu/%lu   ", NTPData.NTPErrors, NTPData.NTPReadCycles);
             break;
 
             case (ENGLISH):
@@ -9940,6 +10238,7 @@ void process_scroll_queue(void)
             case (ENGLISH):
             case (FRENCH):
             case (GERMAN):
+            case (ITALIAN):
             default:
               if (FlashConfig.TemperatureUnit == CELSIUS)
               {
@@ -9973,6 +10272,7 @@ void process_scroll_queue(void)
               break;
  
               case (ENGLISH):
+              case (ITALIAN):
               default:
                 sprintf(String, "Microcontroller: Pico    ");
               break;
@@ -9992,6 +10292,7 @@ void process_scroll_queue(void)
               break;
 
               case (ENGLISH):
+              case (ITALIAN):
               default:
                 sprintf(String, "Microcontroller: Pico W    ");
               break;
@@ -10050,6 +10351,7 @@ void process_scroll_queue(void)
 
             case (ENGLISH):
             case (FRENCH):
+            case (ITALIAN):
             default:
               sprintf(String, "Timezone: %d    ", FlashConfig.Timezone);
             break;
@@ -10070,6 +10372,7 @@ void process_scroll_queue(void)
 
             case (ENGLISH):
             case (FRENCH):
+            case (ITALIAN):
             default:
              sprintf(String, "%2.2f Volts    ", Volts);
             break;
@@ -11910,7 +12213,7 @@ void setup_clock_frame(void)
       FlagSetupClock[SETUP_DAY_OF_MONTH] = FLAG_OFF;
     }
 
-    if ((FlashConfig.Language == CZECH) || (FlashConfig.Language == FRENCH) || (FlashConfig.Language == GERMAN))
+    if ((FlashConfig.Language == CZECH) || (FlashConfig.Language == FRENCH) || (FlashConfig.Language == GERMAN) || (FlashConfig.Language == ITALIAN))
     {
       /* In some languages, display and set day-of-month before month.
          Make a trick in the flashing below. */
@@ -12214,6 +12517,12 @@ void setup_clock_frame(void)
         /// fill_display_buffer_5X7(15, ('G' & FlagBlinking[SETUP_LANGUAGE]));
         fill_display_buffer_5X7(13, ('G' & FlagBlinking[SETUP_LANGUAGE]));
         fill_display_buffer_5X7(19, ('E' & FlagBlinking[SETUP_LANGUAGE]));
+      break;
+
+      case (ITALIAN):
+        /// fill_display_buffer_5X7(15, ('I' & FlagBlinking[SETUP_LANGUAGE]));
+        fill_display_buffer_5X7(13, ('I' & FlagBlinking[SETUP_LANGUAGE]));
+        fill_display_buffer_5X7(19, ('T' & FlagBlinking[SETUP_LANGUAGE]));
       break;
 
       case (SPANISH):
@@ -12818,7 +13127,7 @@ void setup_clock_variables(UINT8 FlagButtonSelect)
     }
 
      /* Setup order in some languages is day-month(-year), as opposed to English month-day(-year). */
-    if ((FlashConfig.Language == CZECH) || (FlashConfig.Language == FRENCH) || (FlashConfig.Language == GERMAN))
+    if ((FlashConfig.Language == CZECH) || (FlashConfig.Language == FRENCH) || (FlashConfig.Language == GERMAN) || (FlashConfig.Language == ITALIAN))
     {
       SETUP_DAY_OF_MONTH = 0x03;
       SETUP_MONTH = 0x04;
@@ -16573,7 +16882,6 @@ bool timer_callback_ms(struct repeating_timer *TimerMSec)
 
   Dum1UInt8 = 0;
 
-  adjust_clock_brightness();  // read ambient light every millisecond and calculate average for last 60 seconds.
   evaluate_blinking_time();   // evaluate if it is time to toggle blinking some data on clock display.
   evaluate_scroll_time();     // evaluate if it is time to scroll one dot to the left on clock display.
 
@@ -16987,7 +17295,7 @@ bool timer_callback_s(struct repeating_timer *TimerSec)
   }
   ***/
 
-
+  adjust_clock_brightness();     // read ambient light every second and calculate average for last 60 seconds.
 
   /* ................................................................ *\
                           Manage time of day
