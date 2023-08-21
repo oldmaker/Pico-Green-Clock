@@ -5,7 +5,8 @@ Firmware Version 9.02 modified by OldMaker, released 17-AUG-2023
 NEW WITH FIRMWARE 9.02 modified by OldMaker:
 ============================================
 - Improve the auto-brightness mechanism (hardware and software); defined two new user-customisable parameters: MIN_LIGHT_LEVEL and MAX_LIGHT_LEVEL.
-- Add Italian language support.
+- Add Italian language support;
+- Only in RELEASE_VERSION, reset the number of NTP errors after a successful ntp_get_time, to suppress the message "NTP errors: #"
 
 
 NEW WITH FIRMWARE 9.02:
