@@ -300,7 +300,7 @@
 #define NETWORK_PASSWORD "MyNetworkPassword"
 
 /* If a Pico W is used, librairies for Wi-Fi and NTP synchronization will be merged in the executable. If PICO_W is not defined, NTP is automatically disabled. */
-#define PICO_W
+// #define PICO_W
 
 /* Flag to handle automatically the daylight saving time. List of countries are given in the User Guide. */
 #define DST_COUNTRY DST_EUROPE
@@ -3270,6 +3270,10 @@ int main(void)
           NTPData.FlagNTPResync = FLAG_OFF;
           NTPData.NTPGetTime    = time_us_64();
           NTPData.NTPLastUpdate = time_us_64();
+
+          #ifdef RELEASE_VERSION
+            NTPData.NTPErrors = 0l;
+          #endif  // RELEASE_VERSION
 
           break;  // get out of "for" loop.
         }
