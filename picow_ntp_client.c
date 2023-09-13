@@ -321,12 +321,14 @@ void ntp_get_time(void)
   if (NTPStruct)
   {
     if (DebugBitMask & DEBUG_NTP) uart_send(__LINE__, "NTPStruct validation Ok.\r");
+
     if ((!NTPData.FlagNTPResync) && (NTPData.NTPGetTime + NTPData.NTPDelta > time_us_64()))
     {
       if (DebugBitMask & DEBUG_NTP)
         uart_send(__LINE__, "NTP poll...\r");
-        NTPData.FlagNTPSuccess = FLAG_POLL;
-        return;
+
+      NTPData.FlagNTPSuccess = FLAG_POLL;
+      return;
     }
 
 
@@ -338,6 +340,7 @@ void ntp_get_time(void)
       uart_send(__LINE__, "NTPStruct->ntp_test_time:     %10lld\r", to_ms_since_boot(NTPStruct->ntp_test_time));
       uart_send(__LINE__, "Time check: %lld usec.\r", absolute_time_diff_us(AbsoluteTime, NTPStruct->ntp_test_time));
     }
+
     if ((absolute_time_diff_us(AbsoluteTime, NTPStruct->ntp_test_time) < 0) && (NTPStruct->dns_request_sent == 0))
     {
       NTPData.NTPReadCycles++;

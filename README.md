@@ -1,12 +1,14 @@
 # Pico Green Clock
-Firmware Version 9.02 modified by OldMaker, released 17-AUG-2023
+Firmware Version 9.02 released 01-JUN-2023
+Firmware Version 9.02.05 modified by OldMaker, released 12-SEP-2023
 
 
-NEW WITH FIRMWARE 9.02 modified by OldMaker:
-============================================
-- Improve the auto-brightness mechanism (hardware and software); defined two new user-customisable parameters: MIN_LIGHT_LEVEL and MAX_LIGHT_LEVEL.
+NEW WITH FIRMWARE 9.02.05 modified by OldMaker:
+===============================================
+- Improve the auto-brightness mechanism (hardware and software); defined two new user-customisable parameters: MIN_LIGHT_LEVEL and MAX_LIGHT_LEVEL; see wiki on GitHub for details.
 - Add Italian language support;
-- Only in RELEASE_VERSION, reset the number of NTP errors after a successful ntp_get_time, to suppress the message "NTP errors: #"
+- Only in RELEASE_VERSION, reset the number of NTP errors after a successful ntp_get_time, to suppress the message "NTP errors: #" and to avoid a sporadic NTP error is displayed forever in the periodic scrolling message.
+- Add a repetition of the Wi-Fi access every 1 minutes, until it is succesfull.
 
 
 NEW WITH FIRMWARE 9.02:

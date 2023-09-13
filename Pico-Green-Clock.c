@@ -2,9 +2,9 @@
    Pico-Clock-Green.c
    St-Louys, Andre - February 2022
    astlouys@gmail.com
-   Revision 01-JUN-2023
+   Revision 01-JUN-2023   (12-SEP-2023)
    Compiler: arm-none-eabi-gcc 7.3.1
-   Version 9.02   ------------------->> Modified by OldMaker (automatic brightness and Italian language)
+   Version 9.02.05   ------------------->> Modified by OldMaker
 
    Raspberry Pi Pico firmware to drive the Waveshare Pico-Green-Clock.
    From an original software version 1.00 by Waveshare
@@ -216,6 +216,13 @@
                      - Fix dates encoded in CalendarEventsGeneric.cpp (example Calendar Events).
                      - Add Czech language support. Thanks to KaeroDot for the excellent work and translation on this feature !
 
+   12-SEP-2023  9.02.05    Changes by OldMaker:
+                     - Add Italian language support.
+                     - Improve the auto-brightness mechanism (hardware and software), see wiki on GitHub for details.
+                     - After a successful ntp_get_time, if in RELEASE_VERSION (normal operation), the number of NTP errors is resetted, 
+                       to avoid a sporadic NTP error is displayed forever in the periodic scrolling message.
+                     - Add a repetition of the Wi-Fi access every 1 minute, until it is succesfull.
+
 \* ================================================================== */
 
 /* ================================================================== *\
@@ -285,7 +292,7 @@
                      "CalendarEventsGeneric.cpp".
 \* ================================================================== */
 /* Firmware version. */
-#define FIRMWARE_VERSION "9.02"  ///
+#define FIRMWARE_VERSION "9.02.05"  ///
 
 /* Select the language for data display. */
 #define DEFAULT_LANGUAGE ENGLISH   // choices for now are FRENCH, ENGLISH, GERMAN, CZECH and ITALIAN.
@@ -1205,6 +1212,8 @@ UINT64 IrInitialValue[MAX_IR_READINGS];  // initial timer value when receiving e
 UCHAR  IrLevel[MAX_IR_READINGS];         // logic levels of remote control signal: 'L' (low), 'H' (high), or 'X' (undefined).
 UINT32 IrResultValue[MAX_IR_READINGS];   // duration of this logic level (Low or High) in the signal received from remote control.
 UINT16 IrStepCount;                      // number of "logic level changes" received from IR remote control in current stream.
+
+UINT8  Letter;                           // to insert accented vowels into variable length strings
 
 UINT16 MiddleKeyPressTime = 0;                                                // keep track of the time the Up ("Middle") key is pressed.
 UINT8  MonthDays[2][12] = {{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},  // number of days in a month - "leap" year.
@@ -2312,10 +2321,19 @@ int main(void)
                         Initialize NTP connection.
   \* ---------------------------------------------------------------- */
   #ifdef PICO_W
-  ReturnCode = ntp_init();
+  for (Loop1UInt8 = 0; Loop1UInt8 < 4; ++Loop1UInt8)
+  {
+    ReturnCode = ntp_init();
 
-  if (DebugBitMask & DEBUG_NTP)
-    uart_send(__LINE__, "main() - ntp_init() return code: %d\r", ReturnCode);
+    if (DebugBitMask & DEBUG_NTP)
+      uart_send(__LINE__, "main() - ntp_init() return code: %d\r", ReturnCode);
+  
+    // If the attempt to connect to WiFi fails, it will try again 3 times.
+    if (!ReturnCode)
+      break;                    // connection succesfull: get out of "for" loop.
+
+    sleep_ms(60000);            // connection failed: wait one minute and repeat the loop.
+  }
   #endif // PICO_W
 
 
@@ -3272,7 +3290,7 @@ int main(void)
           NTPData.NTPLastUpdate = time_us_64();
 
           #ifdef RELEASE_VERSION
-            NTPData.NTPErrors = 0l;
+          NTPData.NTPErrors = 0l;    // reset number of NTP errors after a successful ntp_get_time, to avoid a sporadic NTP error is displayed forever in the periodic scrolling message
           #endif  // RELEASE_VERSION
 
           break;  // get out of "for" loop.
@@ -6196,7 +6214,8 @@ void format_temp(UCHAR *TempString, UCHAR *PreString, float Temperature, float H
       break;
 
       case (ITALIAN):
-        sprintf(&TempString[strlen(TempString)], "  Umidita: %2.2f%%", Humidity);
+        Letter = 140;        // a-grave
+        sprintf(&TempString[strlen(TempString)], "  Umidit%c: %2.2f%%", Letter, Humidity);
       break;
 
       case (ENGLISH):
@@ -6447,7 +6466,7 @@ void get_date_string(UCHAR *String)
 
     /* Add Day-of-month. */
     if (Time_RTC.dayofmonth == 1)
-      sprintf(&String[strlen(String)], "%X° ", Time_RTC.dayofmonth);  // first of month.
+      sprintf(&String[strlen(String)], "%X%c ", Time_RTC.dayofmonth, 0x80);  // first of month.
     else
       sprintf(&String[strlen(String)], "%X ", Time_RTC.dayofmonth);    // other dates.
 
@@ -8625,7 +8644,8 @@ void process_ir_command(UINT8 IrCommand)
             case (ITALIAN):
               if (FlashConfig.FlagScrollEnable == FLAG_ON)
               {
-                sprintf(String, "Scrolling On - Frequenza: %u minuti   Velocita dots: %u msec.", SCROLL_PERIOD_MINUTE, SCROLL_DOT_TIME);
+                Letter = 140;        // a-grave
+                sprintf(String, "Scrolling On - Frequenza: %u minuti   Velocit%c dots: %u msec.", SCROLL_PERIOD_MINUTE, Letter, SCROLL_DOT_TIME);
               }
               else
               {
@@ -9523,7 +9543,8 @@ void process_scroll_queue(void)
                 break;
 
                 case (ITALIAN):
-                  sprintf(String, "Temp.est.: %2.2f%cC  Umidita: %2.2f%%  Pressione: %4.2f hPa ", Bme280Data.TemperatureC, 0x80, Bme280Data.Humidity, Bme280Data.Pressure);
+                  Letter = 140;        // a-grave
+                  sprintf(String, "Temp.est.: %2.2f%cC  Umidit%c: %2.2f%%  Pressione: %4.2f hPa ", Bme280Data.TemperatureC, 0x80, Letter, Bme280Data.Humidity, Bme280Data.Pressure);
                 break;
 
                 case (ENGLISH):
@@ -9547,7 +9568,8 @@ void process_scroll_queue(void)
                 break;
 
                 case (ITALIAN):
-                  sprintf(String, "Temp.est.: %2.2f%cF  Umidita: %2.2f%%  Pressione: %4.2f hPa ", Bme280Data.TemperatureF, 0x80, Bme280Data.Humidity, Bme280Data.Pressure);
+                  Letter = 140;        // a-grave
+                  sprintf(String, "Temp.est.: %2.2f%cF  Umidit%c: %2.2f%%  Pressione: %4.2f hPa ", Bme280Data.TemperatureF, 0x80, Letter, Bme280Data.Humidity, Bme280Data.Pressure);
                 break;
 
                 case (ENGLISH):
@@ -9697,7 +9719,7 @@ void process_scroll_queue(void)
 
         case (TAG_DS3231_TEMP):
           /* This block will read and display temperature from the DS3231 real-time clock IC in the Green-Clock that also provide a temperature sensor. */
-          Temperature = get_ambient_temperature(FlashConfig.TemperatureUnit); // read ambient temperature from DS3231.
+          Temperature = get_ambient_temperature(FlashConfig.TemperatureUnit);   // read ambient temperature from DS3231.
 
           /* Write temperature to the string to be displayed... */
           if (FlashConfig.TemperatureUnit == CELSIUS)
@@ -10193,7 +10215,7 @@ void process_scroll_queue(void)
 
 
         #ifdef PICO_W
-        #ifdef DEVELOPER_VERSION
+        // #ifdef DEVELOPER_VERSION
         case (TAG_NTP_STATUS):
           /* Scroll total number of NTP request failures so far. */
           switch (FlashConfig.Language)
@@ -10217,7 +10239,7 @@ void process_scroll_queue(void)
           }
           scroll_string(24, String);
         break;
-        #endif  // DEVELOPER_VERSION
+        // #endif  // DEVELOPER_VERSION
         #endif  // PICO_W
 
 
