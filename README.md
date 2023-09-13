@@ -1,6 +1,6 @@
 # Pico Green Clock
-Firmware Version 9.02 released 01-JUN-2023
-Firmware Version 9.02.05 modified by OldMaker, released 12-SEP-2023
+- Firmware Version 9.02    by André St-Louys, released 01-JUN-2023
+- Firmware Version 9.02.05 modified by OldMaker, released 12-SEP-2023
 
 
 NEW WITH FIRMWARE 9.02.05 modified by OldMaker:
